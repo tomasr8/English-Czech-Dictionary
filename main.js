@@ -28,6 +28,7 @@
     color: #303030;
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0);
+    z-index: 9999;
   `
 
   const formCSS = `
