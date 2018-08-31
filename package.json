@@ -1,0 +1,22 @@
+{
+  "name": "english-czech-dictionary",
+  "version": "1.0.0",
+  "description": "firefoz addon for english to czech translation",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zedpowa/English-Czech-Dictionary.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zedpowa/English-Czech-Dictionary/issues"
+  },
+  "homepage": "https://github.com/zedpowa/English-Czech-Dictionary#readme",
+  "dependencies": {
+    "xml2js": "^0.4.19"
+  }
+}
