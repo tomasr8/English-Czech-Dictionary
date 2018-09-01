@@ -140,9 +140,10 @@
       .split(/\s+/)[0]
     console.log(`>${selectedText}<`)
 
+    resetResults([], translator.childNodes[1])
+
     if (selectedText === "") {
       translator.style.display = "none"
-      resetResults([], translator.childNodes[1])
       return
     }
 
