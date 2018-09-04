@@ -160,8 +160,11 @@
     const x = e.pageX
     const y = e.pageY
 
-    translator.style.top = `${y + 25}px`
-    translator.style.left = `${x - 30}px`
+    const top = y + 20
+    const left = Math.max(0, Math.min(x - 30, document.body.clientWidth))
+
+    translator.style.top = `${top}px`
+    translator.style.left = `${left}px`
     translator.style.display = "block"
     translator.firstChild.firstChild.value = selectedText
   }
@@ -178,7 +181,7 @@
         key = key.toLowerCase()
         if (key === "escape") {
           translator.style.display = "none"
-        } else if(key === "enter" && translator.style.display !== "none") {
+        } else if (key === "enter" && translator.style.display !== "none") {
           const btn = translator.firstChild.childNodes[1]
           btn.click()
         }
