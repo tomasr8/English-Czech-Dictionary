@@ -1,4 +1,11 @@
 (() => {
+  function removeDuplicates(arr) {
+    const obj = Object.create(null)
+
+    arr.forEach(elem => obj[elem] = elem)
+    return Object.keys(obj)
+  }
+
   function resetResults(results, container) {
     while (container.firstChild) {
       container.removeChild(container.firstChild)
@@ -28,7 +35,8 @@
     color: #303030;
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0);
-    z-index: 9999;
+    z-index: 999999;
+    border: 0 none !important;
   `
 
   const formCSS = `
@@ -37,6 +45,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: row;
+    border: 0 none !important;
   `
 
   const resultsCSS = `
@@ -46,6 +55,7 @@
     background-color: #ebebeb;
     width: 150px;
     border-radius: 0 0 4px 4px;
+    border: 0 none !important;
   `
 
   const sourceLangCSS = `
@@ -111,7 +121,7 @@
 
     btn.addEventListener("click", () => {
       const word = sourceLang.value.toLowerCase()
-      const translations = (dictionary[word] || [])
+      const translations = removeDuplicates(dictionary[word] || [])
       resetResults(translations, results)
     })
 
@@ -164,6 +174,15 @@
 
       document.body.appendChild(translator)
       document.addEventListener("mouseup", e => setTimeout(() => copySelection(e, translator), 50))
+      document.addEventListener("keypress", ({ key }) => {
+        key = key.toLowerCase()
+        if (key === "escape") {
+          translator.style.display = "none"
+        } else if(key === "enter" && translator.style.display !== "none") {
+          const btn = translator.firstChild.childNodes[1]
+          btn.click()
+        }
+      })
     })
     .catch(err => console.error(err))
 })()
