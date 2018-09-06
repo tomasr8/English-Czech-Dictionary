@@ -28,140 +28,66 @@
         return Object.keys(obj)
       }
 
-      function resetResults(results, container) {
+      function setResults(translations, container) {
         while (container.firstChild) {
           container.removeChild(container.firstChild)
         }
 
-        results.forEach(r => {
+        translations.forEach(translation => {
           const span = document.createElement("span")
-          span.textContent = r
-          span.style.cssText = `
-        border-top: 1px dashed #bfbfbf;
-        box-sizing: border-box;
-        width: 150px;
-        padding: 8px 8px;
-      `
+          span.textContent = translation
+          span.classList.add("translation")
           container.appendChild(span)
         })
       }
 
-      const parentCSS = `
-    all: initial;
-    box-sizing: border-box;
-    position: absolute;
-    display: none;
-    width: 200px;
-    height: auto;
-    font-size: 14px;
-    color: #303030;
-    overflow: hidden;
-    background-color: rgba(0, 0, 0, 0);
-    z-index: 999999;
-    border: 0 none !important;
-  `
-
-      const formCSS = `
-    all: initial;
-    border-radius: 4px 4px 4px 0px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: row;
-    border: 0 none !important;
-  `
-
-      const resultsCSS = `
-    all: initial;
-    display: flex;
-    flex-direction: column;
-    background-color: #ebebeb;
-    width: 150px;
-    border-radius: 0 0 4px 4px;
-    border: 0 none !important;
-  `
-
-      const sourceLangCSS = `
-    all: initial;
-    box-sizing: border-box;
-    width: 150px;
-    height: 35px;
-    padding-left: 8px;
-    background-color: #ebebeb;
-  `
-
-      const btnCSS = `
-    all: initial;
-    box-sizing: border-box;
-    overflow: hidden;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    text-align: center;
-    white-space: nowrap;
-    text-decoration: none !important;
-    text-transform: none;
-    text-transform: capitalize;
-    user-select: none;
-    padding: 4px 4px;
-    width: 50px;
-    height: 35px;
-    border: 0 none;
-    cursor: pointer;
-    transition: all 150ms linear;
-    color: #fff;
-    font-size: 15px;
-    justify-content: center;
-    align-items: center;
-    background: #416dea;
-    color: #FFFFFF;
-    outline: none;
-  `
-
       function createTranslator(dictionary) {
+        const id = "tb-1347589031475"
         const parent = document.createElement("div")
-        parent.style.cssText = parentCSS
+        parent.id = id
         parent.addEventListener("mouseup", e => e.stopPropagation())
 
         const form = document.createElement("div")
-        form.style.cssText = formCSS
+        form.classList.add("form")
         parent.appendChild(form)
 
+        const input = document.createElement("input")
+        input.type = "text"
+        input.placeholder = "..."
+        form.appendChild(input)
+
+        const offlineBtn = document.createElement("button")
+        // offlineBtn.innerHTML = "&#8595;"
+        offlineBtn.classList.add("offlineBtn")
+        form.appendChild(offlineBtn)
+
+        const onlineBtn = document.createElement("button")
+        // onlineBtn.innerHTML = "Nenalezeno<br />Zkusit internet?"
+        onlineBtn.classList.add("onlineBtn")
+        form.appendChild(onlineBtn)
+
         const results = document.createElement("div")
-        results.style.cssText = resultsCSS
+        results.classList.add("results")
         parent.appendChild(results)
 
-        const sourceLang = document.createElement("input")
-        sourceLang.type = "text"
-        sourceLang.placeholder = "..."
-        sourceLang.style.cssText = sourceLangCSS
-        form.appendChild(sourceLang)
+        const offlineResults = document.createElement("div")
+        offlineResults.classList.add("offlineResults")
+        results.appendChild(offlineResults)
 
-        const btn = document.createElement("button")
-        btn.textContent = "GO"
-        btn.style.cssText = btnCSS
-        form.appendChild(btn)
-
-        btn.addEventListener("click", () => {
-          const word = sourceLang.value.toLowerCase()
+        offlineBtn.addEventListener("click", () => {
+          const word = input.value.toLowerCase()
           const translations = removeDuplicates(dictionary[word] || [])
-          resetResults(translations, results)
+          setResults(translations, offlineResults)
         })
 
-        btn.addEventListener("mouseover", () => {
-          btn.style.background = "#7192ef"
+        onlineBtn.addEventListener("click", e => {
+          console.log("confirmed 2")
+          const word = input.value.toLowerCase()
+          const translations = ["asdasdas"]
+          setResults(translations, offlineResults)
         })
 
-        btn.addEventListener("mousedown", () => {
-          btn.style.background = "#436fea"
-        })
-
-        btn.addEventListener("mouseleave", () => {
-          btn.style.background = "#416dea"
-        })
-
-        btn.addEventListener("mouseup", () => {
-          btn.style.background = "#416dea"
-        })
+        onlineBtn.addEventListener("keypress", e => e.preventDefault())
 
         return parent
       }
@@ -172,10 +98,10 @@
           .split(/\s+/)[0]
         console.log(`>${selectedText}<`)
 
-        resetResults([], translator.childNodes[1])
+        setResults([], translator.childNodes[1].firstChild)
 
         if (selectedText === "") {
-          translator.style.display = "none"
+          translator.style.setProperty("display", "none", "important")
           return
         }
 
@@ -187,24 +113,42 @@
 
         translator.style.top = `${top}px`
         translator.style.left = `${left}px`
-        translator.style.display = "block"
+        translator.style.setProperty("display", "block", "important")
         translator.firstChild.firstChild.value = selectedText
       }
 
-      const translator = createTranslator({ "text": ["a", "b"] })
 
-      document.body.appendChild(translator)
-      document.addEventListener("mouseup", e => setTimeout(() => copySelection(e, translator), 50))
-      document.addEventListener("keypress", ({ key }) => {
-        key = key.toLowerCase()
-        console.log(key)
-        if (key === "escape") {
-          translator.style.display = "none";
-        } else if(key === "enter" && translator.style.display !== "none") {
-          const btn = translator.firstChild.childNodes[1]
-          btn.click()
-        }
-      })
+      window
+        .fetch("styles.css")
+        .then(res => res.text())
+        .then(css => {
+          console.log("style fetched")
+          const head = document.head
+          const style = document.createElement("style")
+
+          style.type = "text/css"
+          style.appendChild(document.createTextNode(css))
+          head.appendChild(style)
+
+          const translator = createTranslator({
+            "text": ["a"]
+          })
+
+          document.body.appendChild(translator)
+          document.addEventListener("mouseup", e => setTimeout(() => copySelection(e, translator), 50))
+          document.addEventListener("keypress", ({
+            key
+          }) => {
+            key = key.toLowerCase()
+            // console.log(key)
+            if (key === "escape") {
+              translator.style.display = "none";
+            } else if (key === "enter" && translator.style.display !== "none") {
+              const btn = translator.firstChild.childNodes[1]
+              btn.click()
+            }
+          })
+        })
 
       // window
       //   .fetch(browser.extension.getURL("dictionary.json"))

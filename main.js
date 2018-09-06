@@ -24,6 +24,22 @@
     })
   }
 
+  const css = {
+    parent: [
+      "all: initial",
+      "box-sizing: border-box",
+      "position: absolute",
+      "display: none",
+      "width: 200px",
+      "height: auto",
+      "font-size: 14px",
+      "color: #303030",
+      "overflow: hidden",
+      "background-color: rgba(0, 0, 0, 0)",
+      "z-index: 999999",
+    ]
+  }
+
   const parentCSS = `
     all: initial;
     box-sizing: border-box;
