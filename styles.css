@@ -74,7 +74,7 @@
 
 #tb-1347589031475 .form .offlineBtn {
   /* background: #416dea !important; */
-  background-image: url("./da2.svg") !important;
+  /* background-image: url("./da2.svg") !important; */
   /* background-color: #416dea !important; */
   background-color: #ba9215 !important;
 }
@@ -82,7 +82,7 @@
 #tb-1347589031475 .form .onlineBtn {
   /* background-image: url("down-arrow.png"); */
   /* background: #416dea !important; */
-  background-image: url("./ta.svg") !important;
+  /* background-image: url("./ta.svg") !important; */
   /* background-color: #416dea !important; */
   background-color: #ba9215 !important;
 }

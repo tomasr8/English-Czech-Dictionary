@@ -17,7 +17,14 @@
     }
   ],
 
+  "permissions": [
+    "*://glosbe.com/*"
+  ],
+
   "web_accessible_resources": [
+    "styles.css",
+    "ta.svg",
+    "da2.svg",
     "dictionary.json"
   ]
 }

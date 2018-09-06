@@ -82,7 +82,17 @@
 
         onlineBtn.addEventListener("click", e => {
           console.log("confirmed 2")
-          const word = input.value.toLowerCase()
+          const word = encodeURI(input.value.toLowerCase())
+          // window
+          //   .fetch(`https://glosbe.com/gapi/translate?from=eng&dest=ces&format=json&phrase=${word}`)
+          //   .then(res => res.json())
+          //   .then(json => {
+          //     const translations = json.tuc
+          //       .filter(item => item.phrase)
+          //       .map(item => phrase.text)
+
+          //     setResults(translations, offlineResults)
+          //   })
           const translations = ["asdasdas"]
           setResults(translations, offlineResults)
         })
