@@ -37,7 +37,7 @@
     const offlineBtn = document.createElement("button")
     // offlineBtn.innerHTML = "&#8595;"
     offlineBtn.classList.add("offlineBtn")
-    offlineBtn.style.setProperty("background-image", `url(${browser.extension.getURL("./da2.svg")})`, "important")
+    offlineBtn.style.setProperty("background-image", `url(${browser.extension.getURL("./da.svg")})`, "important")
     form.appendChild(offlineBtn)
 
     const onlineBtn = document.createElement("button")
