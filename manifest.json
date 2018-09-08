@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "English-Czech-Dictionary",
-  "version": "1.0",
+  "version": "1.1",
 
   "description": "Creates a dynamic translate box. Translates single words from english to czech.",
   "homepage_url": "https://github.com/zedpowa/English-Czech-Dictionary#readme",
