@@ -9,7 +9,7 @@
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif !important;
   color: #303030 !important;
   overflow: hidden !important;
-  background-color: rgba(0, 0, 0 0) !important;
+  background-color: rgba(0, 0, 0, 0) !important;
   z-index: 999999 !important;
 }
 
@@ -40,7 +40,19 @@
   height: 35px !important;
   padding-left: 8px !important;
   background-color: #ebebeb !important;
+  /* transition: box-shadow 150ms linear !important; */
 }
+
+/* #tb-1347589031475 .form input:hover {
+  border-left: 1px solid #bfbfbf !important;
+  border-top: 1px solid #bfbfbf !important;
+}
+
+#tb-1347589031475 .form input:focus {
+  box-shadow: inset 1px 2px 4px 0px #bababa !important;
+  border-left: 1px solid #bfbfbf !important;
+  border-top: 1px solid #bfbfbf !important;
+} */
 
 #tb-1347589031475 .form .onlineBtn,
 #tb-1347589031475 .form .offlineBtn {
@@ -116,6 +128,10 @@
   width: 100% !important;
   padding: 8px 8px !important;
 }
+
+/* #tb-1347589031475 .results .offlineResults .translation:first-child {
+  border-top: 1px solid #bfbfbf !important;
+} */
 
 /* #tb-1347589031475 .results .offlineResults .err {
   border-top: 1px dashed #bfbfbf !important;

@@ -54,6 +54,12 @@
     offlineResults.classList.add("offlineResults")
     results.appendChild(offlineResults)
 
+    input.addEventListener("keyup", () => {
+      const word = input.value.toLowerCase()
+      const translations = removeDuplicates(dictionary[word] || [])
+      setResults(translations, offlineResults)
+    })
+
     offlineBtn.addEventListener("click", () => {
       const word = input.value.toLowerCase()
       const translations = removeDuplicates(dictionary[word] || [])
