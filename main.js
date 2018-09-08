@@ -57,12 +57,14 @@
     input.addEventListener("keyup", () => {
       const word = input.value.toLowerCase()
       const translations = removeDuplicates(dictionary[word] || [])
+      results.style.setProperty("background-color", "#e4e7f1", "important")
       setResults(translations, offlineResults)
     })
 
     offlineBtn.addEventListener("click", () => {
       const word = input.value.toLowerCase()
       const translations = removeDuplicates(dictionary[word] || [])
+      results.style.setProperty("background-color", "#e4e7f1", "important")
       setResults(translations, offlineResults)
     })
 
@@ -71,6 +73,7 @@
       const word = input.value.toLowerCase()
 
       if (cache[word]) {
+        results.style.setProperty("background-color", "#f1e7e4", "important")
         setResults(cache[word], offlineResults)
       } else if(!fetching) {
         fetching = true
@@ -81,10 +84,11 @@
               .filter(item => item.phrase)
               .map(item => item.phrase.text)
 
+            results.style.setProperty("background-color", "#f1e7e4", "important")
             setResults(translations, offlineResults)
             cache[word] = translations
           })
-          .catch(err => console.error("English-Czech-Dictionary", err))
+          .catch(err => console.error("English-Czech-Dictionary:", err))
           .then(() => fetching = false)
       }
     })
@@ -152,5 +156,5 @@
         }
       })
     })
-    .catch(err => console.error("English-Czech-Dictionary", err))
+    .catch(err => console.error("English-Czech-Dictionary:", err))
 })()
