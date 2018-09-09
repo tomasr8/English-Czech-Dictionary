@@ -1,5 +1,10 @@
-# English-Czech-Dictionary
-Firefox Addon providing English to Czech translation
+ï»¿# English-Czech-Dictionary
+An extension providing English to Czech translation.
+
+Supported browsers:
+
+- Firefox (branch master)
+- Chrome (branch chrome)
 
 This extension allows users to select (by dragging or double clicking) words on a website
 and have them translated from english to czech.
@@ -12,12 +17,12 @@ The blue button translates the word using a dictionary packaged with the extensi
 If this dictionary is insufficient,
 the orange button translates the word using the Glosbe API (https://glosbe.com/).
 
-Toto rozšíøení umoòuje uivatelùm vybrat (buï táhnutím nebo dovjitım kliknutím) slova
-na webovıch stránkách a následnì pøeloit z angliètiny do èeštiny.
+Toto rozÅ¡Ã­Å™enÃ­ umoÅ¾Åˆuje uÅ¾ivatelÅ¯m vybrat (buÄ tÃ¡hnutÃ­m nebo dovjitÃ½m kliknutÃ­m) slova
+na webovÃ½ch strÃ¡nkÃ¡ch a nÃ¡slednÄ› pÅ™eloÅ¾it z angliÄtiny do ÄeÅ¡tiny.
 
-Schovat pøekládácí box mùete, buï kliknutím kdekoliv na stránce nebo zmášknutím escape.
+Schovat pÅ™ekladovÃ½ box mÅ¯Å¾ete, buÄ kliknutÃ­m kdekoliv na strÃ¡nce nebo zmÃ¡ÄknutÃ­m escape.
 
-Vybrané slovo je moné po vybrání dále upravit.
+VybranÃ© slovo je moÅ¾nÃ© dÃ¡le upravit.
 
-Modré tlaèítko pøekládá slova pomocí slovníku pøíbaleného s tímto rozšíøením.
-Pokud by nedostaèoval, oranové tlaèítko pøekládá pomocí Glosbe API (https://glosbe.com/).
+ModrÃ© tlaÄÃ­tko pÅ™eklÃ¡dÃ¡ slova pomocÃ­ slovnÃ­ku pÅ™ibalenÃ©ho s tÃ­mto rozÅ¡Ã­Å™enÃ­m.
+Pokud by nedostaÄoval, oranÅ¾ovÃ© tlaÄÃ­tko pÅ™eklÃ¡dÃ¡ pomocÃ­ Glosbe API (https://glosbe.com/).
