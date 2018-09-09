@@ -37,13 +37,13 @@
     const offlineBtn = document.createElement("button")
     // offlineBtn.innerHTML = "&#8595;"
     offlineBtn.classList.add("offlineBtn")
-    offlineBtn.style.setProperty("background-image", `url(${browser.extension.getURL("./da.svg")})`, "important")
+    offlineBtn.style.setProperty("background-image", `url(${chrome.extension.getURL("./da.svg")})`, "important")
     form.appendChild(offlineBtn)
 
     const onlineBtn = document.createElement("button")
     // onlineBtn.innerHTML = "Nenalezeno<br />Zkusit internet?"
     onlineBtn.classList.add("onlineBtn")
-    onlineBtn.style.setProperty("background-image", `url(${browser.extension.getURL("./ta.svg")})`, "important")
+    onlineBtn.style.setProperty("background-image", `url(${chrome.extension.getURL("./ta.svg")})`, "important")
     form.appendChild(onlineBtn)
 
     const results = document.createElement("div")
@@ -133,8 +133,8 @@
   }
 
   const cache = {}
-  const cssPromise = fetch(browser.extension.getURL("styles.css"))
-  const dictionaryPromise = fetch(browser.extension.getURL("dictionary.json"))
+  const cssPromise = fetch(chrome.extension.getURL("styles.css"))
+  const dictionaryPromise = fetch(chrome.extension.getURL("dictionary.json"))
 
   Promise.all([cssPromise, dictionaryPromise])
     .then(([css, dictionary]) => Promise.all([css.text(), dictionary.json()]))
