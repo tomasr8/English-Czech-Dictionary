@@ -55,17 +55,25 @@
     results.appendChild(offlineResults)
 
     input.addEventListener("keyup", () => {
-      const word = input.value.toLowerCase()
-      const translations = removeDuplicates(dictionary[word] || [])
-      results.style.setProperty("background-color", "#e4e7f1", "important")
-      setResults(translations, offlineResults)
+      const phrase = input.value.toLowerCase()
+      // const translations = removeDuplicates(dictionary[word] || [])
+      translatePhraseOffline(phrase, dictionary)
+        .then(translations => {
+          results.style.setProperty("background-color", "#e4e7f1", "important")
+          setResults(translations, offlineResults)
+        })
+        .catch(err => console.error(err))
     })
 
     offlineBtn.addEventListener("click", () => {
-      const word = input.value.toLowerCase()
-      const translations = removeDuplicates(dictionary[word] || [])
-      results.style.setProperty("background-color", "#e4e7f1", "important")
-      setResults(translations, offlineResults)
+      const phrase = input.value.toLowerCase()
+      // const translations = removeDuplicates(dictionary[word] || [])
+      translatePhraseOffline(phrase, dictionary)
+        .then(translations => {
+          results.style.setProperty("background-color", "#e4e7f1", "important")
+          setResults(translations, offlineResults)
+        })
+        .catch(err => console.error(err))
     })
 
     let fetching = false
@@ -75,7 +83,7 @@
       if (cache[word]) {
         results.style.setProperty("background-color", "#f1e7e4", "important")
         setResults(cache[word], offlineResults)
-      } else if(!fetching) {
+      } else if (!fetching) {
         fetching = true
         fetch(`https://glosbe.com/gapi/translate?from=eng&dest=ces&format=json&phrase=${encodeURI(word)}`)
           .then(res => res.json())
@@ -132,14 +140,53 @@
     head.appendChild(style)
   }
 
+<<<<<<< HEAD
   const cache = {}
   const cssPromise = fetch(browser.extension.getURL("styles.css"))
   const dictionaryPromise = fetch(browser.extension.getURL("dictionary.json"))
+=======
+  function fetchDictionary(length, start) {
+    return fetch(chrome.extension.getURL(`./dictionary/${length}/${start}.json`))
+      .then(res => res.json())
+  }
+>>>>>>> 76ca4c0... load dictionary only partially
 
-  Promise.all([cssPromise, dictionaryPromise])
-    .then(([css, dictionary]) => Promise.all([css.text(), dictionary.json()]))
-    .then(([css, dictionary]) => {
+  const MAX_PHRASE_LENGTH = 4
+  const letters = "abcdefghijklmnopqrstuvwxyz"
 
+  function translatePhraseOffline(phrase, dictionary) {
+    const length = phrase.split(/\s+/).length
+    const start = letters.includes(phrase[0]) ? phrase[0] : "other"
+
+    if (length > MAX_PHRASE_LENGTH) {
+      return Promise.resolve([])
+    }
+
+    if (!dictionary[length][start]) {
+      return fetchDictionary(length, start)
+        .then(data => {
+          dictionary[length][start] = data
+          return removeDuplicates(dictionary[length][start][phrase] || [])
+        })
+    } else {
+      return Promise.resolve(
+        removeDuplicates(dictionary[length][start][phrase] || [])
+      )
+    }
+  }
+
+  const dictionary = Object.create(null)
+  for (let i = 1; i <= MAX_PHRASE_LENGTH; i++) {
+    dictionary[i] = Object.create(null)
+  }
+
+  const cache = Object.create(null)
+  const cssPromise = fetch(chrome.extension.getURL("styles.css"))
+  // const dictionaryPromise = fetch(chrome.extension.getURL("dictionary.json"))
+
+  cssPromise
+    .then(css => css.text())
+    .then(css => {
       insertStyle(css)
 
       const translator = createTranslator(dictionary, cache)
@@ -157,4 +204,26 @@
       })
     })
     .catch(err => console.error("English-Czech-Dictionary:", err))
+
+  // Promise.all([cssPromise, dictionaryPromise])
+  //   .then(([css, dictionary]) => Promise.all([css.text(), dictionary.json()]))
+  //   .then(([css, dictionary]) => {
+
+  //     insertStyle(css)
+
+  //     const translator = createTranslator(dictionary, cache)
+
+  //     document.body.appendChild(translator)
+  //     document.addEventListener("mouseup", e => setTimeout(() => copySelection(e, translator), 50))
+  //     document.addEventListener("keypress", ({ key }) => {
+  //       key = key.toLowerCase()
+  //       if (key === "escape") {
+  //         translator.style.display = "none"
+  //       } else if (key === "enter" && translator.style.display !== "none") {
+  //         const btn = translator.firstChild.childNodes[1]
+  //         btn.click()
+  //       }
+  //     })
+  //   })
+  //   .catch(err => console.error("English-Czech-Dictionary:", err))
 })()

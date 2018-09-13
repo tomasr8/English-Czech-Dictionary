@@ -25,6 +25,10 @@
     "styles.css",
     "ta.svg",
     "da.svg",
-    "dictionary.json"
+    "dictionary.json",
+    "./dictionary/1/*.json",
+    "./dictionary/2/*.json",
+    "./dictionary/3/*.json",
+    "./dictionary/4/*.json"
   ]
 }
