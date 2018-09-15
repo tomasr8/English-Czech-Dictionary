@@ -1,12 +1,141 @@
-(() => {
-  function removeDuplicates(arr) {
-    const obj = Object.create(null)
 
+const DEBUGGING = true
+const debug = {
+  log(...args) {
+    if(DEBUGGING) {
+      console.log("English-Czech-Dictionary:", ...args)
+    }
+  }
+}
+
+// extension assets
+const CSS_URL = browser.extension.getURL("styles.css")
+const DOWN_ARROW_URL = browser.extension.getURL("da.svg")
+const UP_ARROW_URL = browser.extension.getURL("ua.svg")
+const DICT_BASE_PATH = "./dictionary"
+
+// max langth of phrases stored in the local dictionary
+const MAX_PHRASE_LENGTH = 4
+const LETTERS = "abcdefghijklmnopqrstuvwxyz"
+
+// the root HTML element id
+// needed as an anchor for CSS styles
+// to prevent them from clashing with the webpage CSS
+const UUID = "tb-1347589031475"
+
+const createApiUrl = phrase =>
+  `https://glosbe.com/gapi/translate?from=eng&dest=ces&format=json&phrase=${encodeURI(phrase)}`
+
+
+//  fetch css from URL and insert it into the <HEAD> tag
+function loadCSS(url) {
+  return fetch(url)
+    .then(res => res.text())
+    .then(css => {
+      const head = document.head
+      const style = document.createElement("style")
+      style.type = "text/css"
+      style.appendChild(document.createTextNode(css))
+      head.appendChild(style)
+      debug.log("css loaded")
+    })
+}
+
+class LocalDictionary {
+  constructor() {
+    this.dictionary = Object.create(null)
+    for (let i = 1; i <= MAX_PHRASE_LENGTH; i++) {
+      this.dictionary[i] = Object.create(null)
+    }
+  }
+
+  fetchDictionary(phraseLength, start) {
+    debug.log(`fetching local ${phraseLength}/${start}`)
+    return fetch(browser.extension.getURL(`${DICT_BASE_PATH}/${phraseLength}/${start}.json`))
+      .then(res => res.json())
+  }
+
+  removeDuplicates(arr) {
+    const obj = Object.create(null)
     arr.forEach(elem => obj[elem] = elem)
     return Object.keys(obj)
   }
 
-  function setResults(translations, container) {
+  async translate(phrase) {
+    if (phrase === "") {
+      return []
+    }
+
+    phrase = phrase.toLowerCase()
+    const length = phrase.split(/\s+/).length
+    const start = LETTERS.includes(phrase[0]) ? phrase[0] : "other"
+
+    if (length > MAX_PHRASE_LENGTH) {
+      return []
+    }
+
+    if (!this.dictionary[length][start]) {
+      return this.fetchDictionary(length, start)
+        .then(data => {
+          this.dictionary[length][start] = data
+          return this.removeDuplicates(
+            this.dictionary[length][start][phrase] || []
+          )
+        })
+    } else {
+      return this.removeDuplicates(
+        this.dictionary[length][start][phrase] || []
+      )
+    }
+  }
+}
+
+class OnlineDictionary {
+  constructor() {
+    this.cache = Object.create(null)
+    this.fetching = false
+  }
+
+  async translate(phrase) {
+    if (phrase === "") {
+      return []
+    }
+
+    phrase = phrase.toLowerCase()
+
+    if (this.cache[phrase]) {
+      return this.cache[phrase]
+    } else if (!this.fetching) {
+      this.fetching = true
+
+      try {
+        debug.log(`fetching "${phrase}" from online API`)
+        const response = await fetch(createApiUrl(phrase))
+          .then(res => res.json())
+
+        const translations = response.tuc
+          .filter(item => item.phrase)
+          .map(item => item.phrase.text)
+
+        this.cache[phrase] = translations
+        return translations
+      } finally {
+        // do not catch errors here, only reset the fetching status & let the error bubble up
+        this.fetching = false
+      }
+    }
+  }
+}
+
+class Translator {
+  constructor(localDictionary, onlineDictionary) {
+    this.localDictionary = localDictionary
+    this.onlineDictionary = onlineDictionary
+  }
+
+  setResults(translations) {
+    const container = this.root.childNodes[1]
+
     while (container.firstChild) {
       container.removeChild(container.firstChild)
     }
@@ -19,15 +148,48 @@
     })
   }
 
-  function createTranslator(dictionary, cache) {
-    const id = "tb-1347589031475"
-    const parent = document.createElement("div")
-    parent.id = id
-    parent.addEventListener("mouseup", e => e.stopPropagation())
+  triggerLocalTranslation() {
+    const btn = this.root.firstChild.childNodes[1]
+    btn.click()
+  }
+
+  hide() {
+    this.root.style.setProperty("display", "none", "important")
+  }
+
+  onSelect(event) {
+    const selectedText = window
+      .getSelection().toString().trim()
+
+    this.setResults([])
+
+    if (selectedText === "") {
+      this.root.style.setProperty("display", "none", "important")
+      return
+    }
+
+    debug.log(`selected text: >${selectedText}<`)
+
+    const x = event.pageX
+    const y = event.pageY
+
+    const top = y + 20
+    const left = Math.max(0, x - 30)
+
+    this.root.style.setProperty("top", `${top}px`, "important")
+    this.root.style.setProperty("left", `${left}px`, "important")
+    this.root.style.setProperty("display", "block", "important")
+    this.root.firstChild.firstChild.value = selectedText
+  }
+
+  createElement() {
+    this.root = document.createElement("div")
+    this.root.id = UUID
+    this.root.addEventListener("mouseup", e => e.stopPropagation())
 
     const form = document.createElement("div")
     form.classList.add("form")
-    parent.appendChild(form)
+    this.root.appendChild(form)
 
     const input = document.createElement("input")
     input.type = "text"
@@ -35,195 +197,75 @@
     form.appendChild(input)
 
     const offlineBtn = document.createElement("button")
-    // offlineBtn.innerHTML = "&#8595;"
     offlineBtn.classList.add("offlineBtn")
-    offlineBtn.style.setProperty("background-image", `url(${browser.extension.getURL("./da.svg")})`, "important")
+    offlineBtn.style.setProperty("background-image", `url(${DOWN_ARROW_URL})`, "important")
     form.appendChild(offlineBtn)
 
     const onlineBtn = document.createElement("button")
-    // onlineBtn.innerHTML = "Nenalezeno<br />Zkusit internet?"
     onlineBtn.classList.add("onlineBtn")
-    onlineBtn.style.setProperty("background-image", `url(${browser.extension.getURL("./ta.svg")})`, "important")
+    onlineBtn.style.setProperty("background-image", `url(${UP_ARROW_URL})`, "important")
     form.appendChild(onlineBtn)
 
     const results = document.createElement("div")
     results.classList.add("results")
-    parent.appendChild(results)
-
-    const offlineResults = document.createElement("div")
-    offlineResults.classList.add("offlineResults")
-    results.appendChild(offlineResults)
+    this.root.appendChild(results)
 
     input.addEventListener("keyup", () => {
       const phrase = input.value.toLowerCase()
-      // const translations = removeDuplicates(dictionary[word] || [])
-      translatePhraseOffline(phrase, dictionary)
+      this.localDictionary
+        .translate(phrase)
         .then(translations => {
           results.style.setProperty("background-color", "#e4e7f1", "important")
-          setResults(translations, offlineResults)
+          this.setResults(translations)
         })
         .catch(err => console.error(err))
     })
 
     offlineBtn.addEventListener("click", () => {
       const phrase = input.value.toLowerCase()
-      // const translations = removeDuplicates(dictionary[word] || [])
-      translatePhraseOffline(phrase, dictionary)
+      this.localDictionary
+        .translate(phrase)
         .then(translations => {
           results.style.setProperty("background-color", "#e4e7f1", "important")
-          setResults(translations, offlineResults)
+          this.setResults(translations)
         })
         .catch(err => console.error(err))
     })
 
-    let fetching = false
     onlineBtn.addEventListener("click", () => {
-      const word = input.value.toLowerCase()
-
-      if (cache[word]) {
-        results.style.setProperty("background-color", "#f1e7e4", "important")
-        setResults(cache[word], offlineResults)
-      } else if (!fetching) {
-        fetching = true
-        fetch(`https://glosbe.com/gapi/translate?from=eng&dest=ces&format=json&phrase=${encodeURI(word)}`)
-          .then(res => res.json())
-          .then(json => {
-            const translations = json.tuc
-              .filter(item => item.phrase)
-              .map(item => item.phrase.text)
-
-            results.style.setProperty("background-color", "#f1e7e4", "important")
-            setResults(translations, offlineResults)
-            cache[word] = translations
-          })
-          .catch(err => console.error("English-Czech-Dictionary:", err))
-          .then(() => fetching = false)
-      }
+      const phrase = input.value.toLowerCase()
+      this.onlineDictionary
+        .translate(phrase)
+        .then(translations => {
+          results.style.setProperty("background-color", "#f1e7e4", "important")
+          this.setResults(translations)
+        })
+        .catch(err => console.error("English-Czech-Dictionary:", err))
     })
 
     onlineBtn.addEventListener("keypress", e => e.preventDefault())
 
-    return parent
+    return this.root
   }
+}
 
-  function copySelection(e, translator) {
-    const selectedText = window
-      .getSelection().toString().trim()
-      .split(/\s+/)[0]
-    console.log(`>${selectedText}<`)
+loadCSS(CSS_URL)
+  .then(() => {
+    const localDictionary = new LocalDictionary()
+    const onlineDictionary = new OnlineDictionary()
+    const translator = new Translator(localDictionary, onlineDictionary)
 
-    setResults([], translator.childNodes[1].firstChild)
-
-    if (selectedText === "") {
-      translator.style.setProperty("display", "none", "important")
-      return
-    }
-
-    const x = e.pageX
-    const y = e.pageY
-
-    const top = y + 20
-    const left = Math.max(0, x - 30)
-
-    translator.style.setProperty("top", `${top}px`, "important")
-    translator.style.setProperty("left", `${left}px`, "important")
-    translator.style.setProperty("display", "block", "important")
-    translator.firstChild.firstChild.value = selectedText
-  }
-
-  function insertStyle(css) {
-    const head = document.head
-    const style = document.createElement("style")
-
-    style.type = "text/css"
-    style.appendChild(document.createTextNode(css))
-    head.appendChild(style)
-  }
-
-<<<<<<< HEAD
-  const cache = {}
-  const cssPromise = fetch(browser.extension.getURL("styles.css"))
-  const dictionaryPromise = fetch(browser.extension.getURL("dictionary.json"))
-=======
-  function fetchDictionary(length, start) {
-    return fetch(chrome.extension.getURL(`./dictionary/${length}/${start}.json`))
-      .then(res => res.json())
-  }
->>>>>>> 76ca4c0... load dictionary only partially
-
-  const MAX_PHRASE_LENGTH = 4
-  const letters = "abcdefghijklmnopqrstuvwxyz"
-
-  function translatePhraseOffline(phrase, dictionary) {
-    const length = phrase.split(/\s+/).length
-    const start = letters.includes(phrase[0]) ? phrase[0] : "other"
-
-    if (length > MAX_PHRASE_LENGTH) {
-      return Promise.resolve([])
-    }
-
-    if (!dictionary[length][start]) {
-      return fetchDictionary(length, start)
-        .then(data => {
-          dictionary[length][start] = data
-          return removeDuplicates(dictionary[length][start][phrase] || [])
-        })
-    } else {
-      return Promise.resolve(
-        removeDuplicates(dictionary[length][start][phrase] || [])
-      )
-    }
-  }
-
-  const dictionary = Object.create(null)
-  for (let i = 1; i <= MAX_PHRASE_LENGTH; i++) {
-    dictionary[i] = Object.create(null)
-  }
-
-  const cache = Object.create(null)
-  const cssPromise = fetch(chrome.extension.getURL("styles.css"))
-  // const dictionaryPromise = fetch(chrome.extension.getURL("dictionary.json"))
-
-  cssPromise
-    .then(css => css.text())
-    .then(css => {
-      insertStyle(css)
-
-      const translator = createTranslator(dictionary, cache)
-
-      document.body.appendChild(translator)
-      document.addEventListener("mouseup", e => setTimeout(() => copySelection(e, translator), 50))
-      document.addEventListener("keypress", ({ key }) => {
-        key = key.toLowerCase()
-        if (key === "escape") {
-          translator.style.display = "none"
-        } else if (key === "enter" && translator.style.display !== "none") {
-          const btn = translator.firstChild.childNodes[1]
-          btn.click()
-        }
-      })
+    const root = translator.createElement()
+    document.body.appendChild(root)
+    document.addEventListener("mouseup", event => setTimeout(() => translator.onSelect(event), 50))
+    document.addEventListener("keypress", ({ key }) => {
+      key = key.toLowerCase()
+      if (key === "escape") {
+        translator.hide()
+      } else if (key === "enter" && root.style.display !== "none") {
+        translator.triggerLocalTranslation()
+      }
     })
-    .catch(err => console.error("English-Czech-Dictionary:", err))
 
-  // Promise.all([cssPromise, dictionaryPromise])
-  //   .then(([css, dictionary]) => Promise.all([css.text(), dictionary.json()]))
-  //   .then(([css, dictionary]) => {
-
-  //     insertStyle(css)
-
-  //     const translator = createTranslator(dictionary, cache)
-
-  //     document.body.appendChild(translator)
-  //     document.addEventListener("mouseup", e => setTimeout(() => copySelection(e, translator), 50))
-  //     document.addEventListener("keypress", ({ key }) => {
-  //       key = key.toLowerCase()
-  //       if (key === "escape") {
-  //         translator.style.display = "none"
-  //       } else if (key === "enter" && translator.style.display !== "none") {
-  //         const btn = translator.firstChild.childNodes[1]
-  //         btn.click()
-  //       }
-  //     })
-  //   })
-  //   .catch(err => console.error("English-Czech-Dictionary:", err))
-})()
+  })
+  .catch(err => console.error("English-Czech-Dictionary:", err))

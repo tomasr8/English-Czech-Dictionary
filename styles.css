@@ -122,17 +122,19 @@
   background-color: #1592bc !important;
 }
 
-#tb-1347589031475 .results .offlineResults {
+/* #tb-1347589031475 .results .offlineResults {
   display: flex !important;
   flex-direction: column !important;
-}
+} */
 
-#tb-1347589031475 .results .offlineResults .translation {
+#tb-1347589031475 .results .translation {
   border-top: 1px dashed #bfbfbf !important;
   box-sizing: border-box !important;
   width: 100% !important;
   padding: 8px 8px !important;
 }
+
+
 
 /* #tb-1347589031475 .results .offlineResults .translation:first-child {
   border-top: 1px solid #bfbfbf !important;

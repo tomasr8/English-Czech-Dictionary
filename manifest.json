@@ -23,7 +23,7 @@
 
   "web_accessible_resources": [
     "styles.css",
-    "ta.svg",
+    "ua.svg",
     "da.svg",
     "dictionary.json",
     "./dictionary/1/*.json",
