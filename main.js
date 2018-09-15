@@ -2,13 +2,17 @@
 const DEBUGGING = true
 const debug = {
   log(...args) {
-    if(DEBUGGING) {
+    if (DEBUGGING) {
       console.log("English-Czech-Dictionary:", ...args)
     }
+  },
+  error(...args) {
+    console.error("English-Czech-Dictionary:", ...args)
   }
 }
 
 // extension assets
+const HTML_URL = browser.extension.getURL("translator.html")
 const CSS_URL = browser.extension.getURL("styles.css")
 const DOWN_ARROW_URL = browser.extension.getURL("da.svg")
 const UP_ARROW_URL = browser.extension.getURL("ua.svg")
@@ -21,7 +25,7 @@ const LETTERS = "abcdefghijklmnopqrstuvwxyz"
 // the root HTML element id
 // needed as an anchor for CSS styles
 // to prevent them from clashing with the webpage CSS
-const UUID = "tb-1347589031475"
+// const UUID = "tb-1347589031475"
 
 const createApiUrl = phrase =>
   `https://glosbe.com/gapi/translate?from=eng&dest=ces&format=json&phrase=${encodeURI(phrase)}`
@@ -134,7 +138,7 @@ class Translator {
   }
 
   setResults(translations) {
-    const container = this.root.childNodes[1]
+    const container = this.root.querySelector(".results")
 
     while (container.firstChild) {
       container.removeChild(container.firstChild)
@@ -149,8 +153,7 @@ class Translator {
   }
 
   triggerLocalTranslation() {
-    const btn = this.root.firstChild.childNodes[1]
-    btn.click()
+    this.root.querySelector(".form .offlineBtn").click()
   }
 
   hide() {
@@ -175,90 +178,89 @@ class Translator {
 
     const top = y + 20
     const left = Math.max(0, x - 30)
-
     this.root.style.setProperty("top", `${top}px`, "important")
     this.root.style.setProperty("left", `${left}px`, "important")
     this.root.style.setProperty("display", "block", "important")
-    this.root.firstChild.firstChild.value = selectedText
+    this.root.querySelector(".form input").value = selectedText
+  }
+
+  htmlToElement(html) {
+    const template = document.createElement("template")
+    html = html.trim()
+    template.innerHTML = html
+    return template.content.firstChild
   }
 
   createElement() {
-    this.root = document.createElement("div")
-    this.root.id = UUID
-    this.root.addEventListener("mouseup", e => e.stopPropagation())
+    return fetch(HTML_URL)
+      .then(res => res.text())
+      .then(html => {
+        this.root = this.htmlToElement(html)
+        this.root.addEventListener("mouseup", e => e.stopPropagation())
 
-    const form = document.createElement("div")
-    form.classList.add("form")
-    this.root.appendChild(form)
+        const offlineBtn = this.root.querySelector(".form .offlineBtn")
+        offlineBtn.style.setProperty("background-image", `url(${DOWN_ARROW_URL})`, "important")
 
-    const input = document.createElement("input")
-    input.type = "text"
-    input.placeholder = "..."
-    form.appendChild(input)
+        const onlineBtn = this.root.querySelector(".form .onlineBtn")
+        onlineBtn.style.setProperty("background-image", `url(${UP_ARROW_URL})`, "important")
 
-    const offlineBtn = document.createElement("button")
-    offlineBtn.classList.add("offlineBtn")
-    offlineBtn.style.setProperty("background-image", `url(${DOWN_ARROW_URL})`, "important")
-    form.appendChild(offlineBtn)
+        const input = this.root.querySelector(".form input")
+        const results = this.root.querySelector(".results")
 
-    const onlineBtn = document.createElement("button")
-    onlineBtn.classList.add("onlineBtn")
-    onlineBtn.style.setProperty("background-image", `url(${UP_ARROW_URL})`, "important")
-    form.appendChild(onlineBtn)
-
-    const results = document.createElement("div")
-    results.classList.add("results")
-    this.root.appendChild(results)
-
-    input.addEventListener("keyup", () => {
-      const phrase = input.value.toLowerCase()
-      this.localDictionary
-        .translate(phrase)
-        .then(translations => {
-          results.style.setProperty("background-color", "#e4e7f1", "important")
-          this.setResults(translations)
+        input.addEventListener("keyup", () => {
+          const phrase = input.value.toLowerCase()
+          this.localDictionary
+            .translate(phrase)
+            .then(translations => {
+              results.style.setProperty("background-color", "#e4e7f1", "important")
+              this.setResults(translations)
+            })
+            .catch(err => debug.error(err))
         })
-        .catch(err => console.error(err))
-    })
 
-    offlineBtn.addEventListener("click", () => {
-      const phrase = input.value.toLowerCase()
-      this.localDictionary
-        .translate(phrase)
-        .then(translations => {
-          results.style.setProperty("background-color", "#e4e7f1", "important")
-          this.setResults(translations)
+        offlineBtn.addEventListener("click", () => {
+          const phrase = input.value.toLowerCase()
+          this.localDictionary
+            .translate(phrase)
+            .then(translations => {
+              results.style.setProperty("background-color", "#e4e7f1", "important")
+              this.setResults(translations)
+            })
+            .catch(err => debug.error(err))
         })
-        .catch(err => console.error(err))
-    })
 
-    onlineBtn.addEventListener("click", () => {
-      const phrase = input.value.toLowerCase()
-      this.onlineDictionary
-        .translate(phrase)
-        .then(translations => {
-          results.style.setProperty("background-color", "#f1e7e4", "important")
-          this.setResults(translations)
+        onlineBtn.addEventListener("click", () => {
+          const phrase = input.value.toLowerCase()
+          this.onlineDictionary
+            .translate(phrase)
+            .then(translations => {
+              results.style.setProperty("background-color", "#f1e7e4", "important")
+              this.setResults(translations)
+            })
+            .catch(err => debug.error(err))
         })
-        .catch(err => console.error("English-Czech-Dictionary:", err))
-    })
 
-    onlineBtn.addEventListener("keypress", e => e.preventDefault())
-
-    return this.root
+        // prevent selection of text in the translation box
+        onlineBtn.addEventListener("keypress", e => e.preventDefault())
+        return this.root
+      })
   }
 }
 
+
+const localDictionary = new LocalDictionary()
+const onlineDictionary = new OnlineDictionary()
+const translator = new Translator(localDictionary, onlineDictionary)
+
 loadCSS(CSS_URL)
   .then(() => {
-    const localDictionary = new LocalDictionary()
-    const onlineDictionary = new OnlineDictionary()
-    const translator = new Translator(localDictionary, onlineDictionary)
-
-    const root = translator.createElement()
+    return translator.createElement()
+  })
+  .then(root => {
     document.body.appendChild(root)
     document.addEventListener("mouseup", event => setTimeout(() => translator.onSelect(event), 50))
     document.addEventListener("keypress", ({ key }) => {
+      console.log(key)
       key = key.toLowerCase()
       if (key === "escape") {
         translator.hide()
@@ -266,6 +268,5 @@ loadCSS(CSS_URL)
         translator.triggerLocalTranslation()
       }
     })
-
   })
-  .catch(err => console.error("English-Czech-Dictionary:", err))
+  .catch(err => debug.error(err))
