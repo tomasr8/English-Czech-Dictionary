@@ -1,4 +1,3 @@
-
 const DEBUGGING = true
 const debug = {
   log(...args) {
@@ -11,21 +10,18 @@ const debug = {
   }
 }
 
+// crossbrowser fix
+const browserPrefix = typeof browser !== "undefined" ? browser : chrome
 // extension assets
-const HTML_URL = browser.extension.getURL("translator.html")
-const CSS_URL = browser.extension.getURL("styles.css")
-const DOWN_ARROW_URL = browser.extension.getURL("da.svg")
-const UP_ARROW_URL = browser.extension.getURL("ua.svg")
+const HTML_URL = browserPrefix.extension.getURL("translator.html")
+const CSS_URL = browserPrefix.extension.getURL("styles.css")
+const DOWN_ARROW_URL = browserPrefix.extension.getURL("da.svg")
+const UP_ARROW_URL = browserPrefix.extension.getURL("ua.svg")
 const DICT_BASE_PATH = "./dictionary"
 
-// max langth of phrases stored in the local dictionary
+// max length of phrases stored in the local dictionary
 const MAX_PHRASE_LENGTH = 4
 const LETTERS = "abcdefghijklmnopqrstuvwxyz"
-
-// the root HTML element id
-// needed as an anchor for CSS styles
-// to prevent them from clashing with the webpage CSS
-// const UUID = "tb-1347589031475"
 
 const createApiUrl = phrase =>
   `https://glosbe.com/gapi/translate?from=eng&dest=ces&format=json&phrase=${encodeURI(phrase)}`
@@ -55,7 +51,7 @@ class LocalDictionary {
 
   fetchDictionary(phraseLength, start) {
     debug.log(`fetching local ${phraseLength}/${start}`)
-    return fetch(browser.extension.getURL(`${DICT_BASE_PATH}/${phraseLength}/${start}.json`))
+    return fetch(browserPrefix.extension.getURL(`${DICT_BASE_PATH}/${phraseLength}/${start}.json`))
       .then(res => res.json())
   }
 
