@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "English-Czech Dictionary",
-  "version": "1.1",
+  "version": "1.2",
 
   "description": "An extension providing English to Czech translation",
   "homepage_url": "https://github.com/zedpowa/English-Czech-Dictionary#readme",
