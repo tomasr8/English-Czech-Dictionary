@@ -7,7 +7,8 @@
   "description": "An extension providing English to Czech translation",
   "homepage_url": "https://github.com/zedpowa/English-Czech-Dictionary#readme",
   "icons": {
-    "48": "icons/dict-48.png"
+    "48": "icons/dict-48.png",
+    "128": "icons/dict-128.png"
   },
 
   "content_scripts": [
