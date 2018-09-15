@@ -26,7 +26,6 @@
     "styles.css",
     "ua.svg",
     "da.svg",
-    "dictionary.json",
     "./dictionary/1/*.json",
     "./dictionary/2/*.json",
     "./dictionary/3/*.json",
